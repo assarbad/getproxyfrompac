@@ -2,3 +2,4 @@ syntax: glob
 Release/**
 Debug/**
 *.lnt
+Visual Lint/**
