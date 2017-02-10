@@ -35,16 +35,17 @@ void printLastError(LPCTSTR failedFuncName, HMODULE hMsgFile)
 
 extern "C" int _tmain(int argc, _TCHAR* argv[])
 {
+    CSimpleBuf<TCHAR> detectedPacUrl;
     CLoadLibrary winhttp(_T("winhttp.dll"));
     if (argc < 2 || argc > 3)
     {
         _ftprintf(stderr, _T("Syntax:\n\t%s <url> [pac-url]>\n"), argv[0]);
         return __LINE__;
     }
-    LPCTSTR lpszURLtoCheck = argv[1];
-    LPCTSTR lpszPacURL = argv[2];
-    /* the value for argv[argc] is always NULL, so if only */
-    if (NULL == lpszPacURL)
+    LPCTSTR lpszUrlToCheck = argv[1];
+    LPCTSTR lpszPacUrl = argv[2];
+    /* the value for argv[argc] is always NULL, so if no PAC URL is given we can detect it this way */
+    if (NULL == lpszPacUrl)
     {
         LPTSTR lpszAutoConfigUrl = NULL;
         if (!::WinHttpDetectAutoProxyConfigUrl(WINHTTP_AUTO_DETECT_TYPE_DHCP | WINHTTP_AUTO_DETECT_TYPE_DNS_A, &lpszAutoConfigUrl))
@@ -53,6 +54,13 @@ extern "C" int _tmain(int argc, _TCHAR* argv[])
             _ftprintf(stderr, _T("You can avoid this error by giving an explict PAC file URL.\n"));
             return __LINE__;
         }
+        if (lpszAutoConfigUrl)
+        {
+            detectedPacUrl = lpszAutoConfigUrl;
+            lpszPacUrl = detectedPacUrl.Buffer();
+            _tprintf(_T("Auto-detected PAC file URL: %s\n"), lpszPacUrl);
+        }
+        ::GlobalFree((HGLOBAL)lpszAutoConfigUrl);
     }
     HINTERNET hInet = ::WinHttpOpen(_T("User"), WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (NULL == hInet)
@@ -64,8 +72,8 @@ extern "C" int _tmain(int argc, _TCHAR* argv[])
     WINHTTP_PROXY_INFO proxyInfo = { 0 };
     autoProxyOptions.dwFlags = WINHTTP_AUTOPROXY_CONFIG_URL;
     autoProxyOptions.dwAutoDetectFlags = 0 /* the .NET version passed: WINHTTP_AUTO_DETECT_TYPE_DHCP | WINHTTP_AUTO_DETECT_TYPE_DNS_A */;
-    autoProxyOptions.lpszAutoConfigUrl = lpszPacURL;
-    BOOL bProceed = ::WinHttpGetProxyForUrl(hInet, lpszURLtoCheck, &autoProxyOptions, &proxyInfo);
+    autoProxyOptions.lpszAutoConfigUrl = lpszPacUrl;
+    BOOL bProceed = ::WinHttpGetProxyForUrl(hInet, lpszUrlToCheck, &autoProxyOptions, &proxyInfo);
     if (!bProceed)
     {
         printLastError(_T("WinHttpGetProxyForUrl"), winhttp.getHandle());
