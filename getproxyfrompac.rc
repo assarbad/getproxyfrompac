@@ -32,12 +32,6 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE  
-BEGIN
-    "1 TYPELIB ""getproxyfrompac.tlb""\r\n"
-    "\0"
-END
-
 #endif    // APSTUDIO_INVOKED
 
 #ifndef _MAC
@@ -71,7 +65,6 @@ BEGIN
             VALUE "OriginalFilename", "getproxyfrompac.exe"
             VALUE "ProductName", "TODO: <Product name>"
             VALUE "ProductVersion", "1.0.0.1"
-            VALUE "OLESelfRegister", ""
         END
     END
     BLOCK "VarFileInfo"
@@ -81,19 +74,6 @@ BEGIN
 END
 
 #endif    // !_MAC
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
-
-STRINGTABLE  
-BEGIN
-	IDS_PROJNAME					"getproxyfrompac"
-END
-
-////////////////////////////////////////////////////////////////////////////
-
 
 #endif
 
